@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WanderWay Cloud Architecture</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background: linear-gradient(135deg, #0a0f2c, #1a2347);
+      color: #f5f5f5;
+      line-height: 1.6;
+    }
+    header {
+      text-align: center;
+      padding: 50px 20px;
+      background: linear-gradient(90deg, #007bff, #6f42c1);
+    }
+    header h1 { font-size: 2.5em; margin: 0; }
+    header p { color: #d1d1d1; font-size: 1.1em; margin-top: 10px; }
+    section {
+      max-width: 1150px;
+      margin: 40px auto;
+      background: rgba(255,255,255,0.05);
+      padding: 30px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    h2 {
+      color: #61dafb;
+      border-bottom: 2px solid #61dafb;
+      padding-bottom: 5px;
+    }
+    h3 { color: #ffd966; }
+    ul { list-style-type: square; margin-left: 20px; }
+
+    /* Diagram Shared Styling */
+    .diagram-container {
+      background: #0f162d;
+      border-radius: 12px;
+      padding: 40px 20px;
+      border: 1px solid #2a3658;
+      margin-top: 25px;
+      overflow-x: auto;
+    }
+    .diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+    }
+    .diagram-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 25px;
+      flex-wrap: wrap;
+    }
+    .box {
+      background: linear-gradient(145deg, #1b2b55, #162140);
+      border: 1px solid #355c9c;
+      border-radius: 10px;
+      padding: 15px 25px;
+      text-align: center;
+      width: 210px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+    }
+    .box:hover {
+      transform: scale(1.05);
+      border-color: #00c6ff;
+      box-shadow: 0 0 20px rgba(0,198,255,0.5);
+    }
+    .box h4 { margin: 0; font-size: 1em; color: #00c6ff; }
+    .box p { font-size: 0.85em; color: #b8c2d1; margin: 5px 0 0; }
+    .arrow {
+      width: 40px; height: 40px;
+      border-bottom: 2px solid #61dafb;
+      border-right: 2px solid #61dafb;
+      transform: rotate(45deg);
+      margin: 10px;
+      animation: arrowFloat 1.5s infinite ease-in-out alternate;
+    }
+    @keyframes arrowFloat { from { transform: rotate(45deg) translateY(0); } to { transform: rotate(45deg) translateY(8px); } }
+
+    /* Table + Footer */
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid rgba(255,255,255,0.1); padding: 8px; text-align: left; }
+    th { background-color: rgba(0,0,0,0.3); color: #00ffff; }
+    td { background-color: rgba(255,255,255,0.05); }
+    .footer {
+      text-align: center; color: #aaa; padding: 20px;
+      font-size: 0.9em; border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    @media (max-width:768px){ .diagram-row{flex-direction:column;} .box{width:80%;} }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Cloud Architecture Design</h1>
+  <p>Design infrastructure and cost planning</p>
+  <h3><u>Group 5</u></h3>
+</header>
+
+<section id="overview">
+  <h2>1. Overview</h2>
+  <p>
+    The <strong>WanderWays</strong> travel platform uses AWS services to provide an elastic, scalable, and secure environment.
+    It handles everything from user authentication to trip recommendations and bookings through an automated, monitored deployment pipeline.
+  </p>
+</section>
+
+<!-- ===== HIGH-LEVEL ARCHITECTURE DIAGRAM (ALL BOXED LAYERS) ===== -->
+<section id="diagram">
+  <h2 class="diagram-title">2. High-Level Architecture Diagram</h2>
+
+  <!-- Outer container for all layers -->
+  <div class="full-architecture">
+
+    <!-- === PRESENTATION LAYER === -->
+    <div class="layer-box">
+      <h3 class="layer-title">Presentation Layer</h3>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Users</h4><p>Web & Mobile Clients</p></div>
+      </div>
+
+      <div class="arrow-down">↓</div>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Amazon Route 53</h4><p>DNS & Domain Routing</p></div>
+        <div class="box"><h4>AWS Certificate Manager</h4><p>SSL / HTTPS</p></div>
+        <div class="box"><h4>AWS WAF</h4><p>Web Firewall</p></div>
+      </div>
+
+      <div class="arrow-down">↓</div>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Amazon CloudFront</h4><p>CDN Edge Delivery</p></div>
+        <div class="box"><h4>Amazon S3</h4><p>Static React Hosting</p></div>
+      </div>
+    </div>
+
+    <div class="layer-separator">⬇</div>
+
+    <!-- === APPLICATION LAYER === -->
+    <div class="layer-box">
+      <h3 class="layer-title">Application Layer</h3>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Application Load Balancer</h4><p>Traffic Distribution</p></div>
+        <div class="box"><h4>EC2 Auto Scaling Group</h4><p>Node.js Backend</p></div>
+        <div class="box"><h4>AWS Elastic Beanstalk</h4><p>Deployment Automation</p></div>
+      </div>
+
+      <div class="arrow-down">↓</div>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Amazon API Gateway</h4><p>Serverless Entry</p></div>
+        <div class="box"><h4>AWS Lambda</h4><p>AI Trip Recommender (Gemini API)</p></div>
+      </div>
+    </div>
+
+    <div class="layer-separator">⬇</div>
+
+    <!-- === DATA LAYER === -->
+    <div class="layer-box">
+      <h3 class="layer-title">Data Layer</h3>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Amazon DocumentDB</h4><p>MongoDB-Compatible DB</p></div>
+        <div class="box"><h4>Amazon ElastiCache (Redis)</h4><p>Caching Layer</p></div>
+        <div class="box"><h4>Amazon Cognito</h4><p>User Authentication</p></div>
+      </div>
+    </div>
+
+    <div class="layer-separator">⬇</div>
+
+    <!-- === MONITORING & MANAGEMENT LAYER === -->
+    <div class="layer-box">
+      <h3 class="layer-title">Monitoring & Management Layer</h3>
+
+      <div class="diagram-row">
+        <div class="box"><h4>Amazon CloudWatch</h4><p>Logs & Metrics</p></div>
+        <div class="box"><h4>AWS X-Ray</h4><p>Tracing</p></div>
+        <div class="box"><h4>Amazon SNS</h4><p>Alerts</p></div>
+        <div class="box"><h4>CodePipeline + CodeDeploy</h4><p>CI/CD Automation</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+body {
+  background: #071426;
+  font-family: 'Poppins', sans-serif;
+  color: #e8f2ff;
+}
+
+/* Section title */
+.diagram-title {
+  text-align: left;
+  font-size: 1.5em;
+  color: #61dafb;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 5px;
+  margin-bottom: 25px;
+}
+
+/* Entire architecture container */
+.full-architecture {
+  /*width: 90%;
+  max-width: 950px;
+  margin: 0 auto;*/
+  background: rgba(5, 15, 35, 0.9);
+  border: 1px solid rgba(0,255,255,0.2);
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 0 25px rgba(0,255,255,0.05);
+}
+
+/* Individual layer container */
+.layer-box {
+  border: 1px solid rgba(0,255,255,0.25);
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 40px;
+  background: linear-gradient(180deg, rgba(8,18,45,0.9), rgba(10,25,50,0.9));
+  box-shadow: 0 0 20px rgba(0,255,255,0.05);
+}
+
+/* Layer titles */
+.layer-title {
+  color: #00eaff;
+  font-weight: 600;
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px rgba(0,255,255,0.4);
+  border-bottom: 1px solid rgba(0,255,255,0.3);
+  padding-bottom: 4px;
+  text-align: center;
+}
+
+/* Diagram layout rows */
+.diagram-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  margin: 20px 0;
+}
+
+/* Individual service boxes */
+.box {
+  border: 1px solid rgba(0,200,255,0.6);
+  border-radius: 10px;
+  background: linear-gradient(145deg, rgba(10,25,55,0.95), rgba(14,35,70,0.9));
+  box-shadow: 0 0 10px rgba(0,200,255,0.1);
+  padding: 15px 25px;
+  width: 220px;
+  text-align: center;
+  transition: 0.3s;
+}
+.box:hover {
+  border-color: #00eaff;
+  box-shadow: 0 0 20px rgba(0,255,255,0.25);
+}
+
+.box h4 {
+  color: #00aaff;
+  font-weight: 600;
+  margin: 0;
+}
+.box p {
+  font-size: 0.85em;
+  color: #bcd4f5;
+  margin-top: 5px;
+}
+
+/* Arrows */
+.arrow-down, .layer-separator {
+  text-align: center;
+  font-size: 1.8em;
+  color: #00eaff;
+  opacity: 0.8;
+  margin: 10px 0;
+  text-shadow: 0 0 10px rgba(0,255,255,0.3);
+}
+.layer-separator {
+  font-size: 2.2em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .diagram-row { flex-direction: column; }
+}
+</style>
+
+
+
+<!-- USER WORKFLOW DIAGRAM (Compact Boxed Flow) -->
+<section id="userflow">
+  <h2>2.1 User Workflow Diagram</h2>
+  
+  <div class="userflow-wrapper">
+
+    <!-- Top Horizontal Box -->
+    <div class="flow-group-box">
+      <div class="flow-row">
+        <div class="flow-box">
+          <h4>User Login</h4>
+          <p>via Amazon Cognito</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Home Page</h4>
+          <p>Served from S3 + CloudFront</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Browse Trips</h4>
+          <p>Data fetched via API Gateway → EC2</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Downward Arrow -->
+    <div class="down-arrow">⬇</div>
+
+    <!-- Second Row -->
+    <div class="flow-group-box">
+      <div class="flow-row">
+        <div class="flow-box">
+          <h4>AI Recommendation</h4>
+          <p>Lambda calls Gemini API</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Save/Book Trip</h4>
+          <p>Stored in DocumentDB</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Cache Trip Data</h4>
+          <p>ElastiCache (Redis)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Downward Arrow -->
+    <div class="down-arrow">⬇</div>
+
+    <!-- Third Row -->
+     <div class="flow-group-box">
+      <div class="flow-row">
+        <div class="flow-box">
+          <h4>Payment & Confirmation</h4>
+          <p>Processed via Backend</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Notification</h4>
+          <p>Amazon SNS sends updates</p>
+        </div>
+        <div class="flow-arrow">➜</div>
+        <div class="flow-box">
+          <h4>Monitoring</h4>
+          <p>CloudWatch + X-Ray logs flow</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+.userflow-wrapper {
+  background: #081229;
+  border: 2px solid rgba(0, 200, 255, 0.3);
+  border-radius: 16px;
+  padding: 40px 20px;
+  margin-top: 25px;
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.15);
+}
+
+.flow-group-box {
+  border: 2px solid rgba(0, 255, 255, 0.4);
+  border-radius: 14px;
+  padding: 25px 20px;
+  background: rgba(10, 25, 60, 0.6);
+  box-shadow: inset 0 0 25px rgba(0, 180, 255, 0.15);
+  margin-bottom: 10px;
+}
+
+.flow-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.flow-box {
+  background: linear-gradient(145deg, #0b1e40, #122b56);
+  border: 1px solid #00b4ff;
+  border-radius: 10px;
+  padding: 18px 30px;
+  text-align: center;
+  width: 260px;
+  box-shadow: 0 0 20px rgba(0, 180, 255, 0.15);
+  transition: all 0.3s ease;
+}
+.flow-box:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.35);
+  border-color: #00eaff;
+}
+.flow-box h4 {
+  margin: 0;
+  font-size: 1.1em;
+  color: #00aaff;
+}
+.flow-box p {
+  margin: 5px 0 0;
+  font-size: 0.85em;
+  color: #b8c9dc;
+}
+
+.flow-arrow {
+  font-size: 2em;
+  color: #00d4ff;
+  opacity: 0.7;
+}
+.down-arrow {
+  font-size: 1.8em;
+  color: #00bfff;
+  text-align: center;
+  margin: 15px 0;
+}
+
+@media (max-width: 900px) {
+  .flow-row {
+    flex-direction: column;
+  }
+  .flow-arrow, .down-arrow {
+    transform: rotate(90deg);
+  }
+}
+</style>
+
+
+<!-- REST OF SECTIONS (3–10) -->
+<section id="components">
+  <h2>3. Architecture Components</h2>
+  <ul>
+    <li><strong>Frontend:</strong> S3, CloudFront, Route 53, ACM</li>
+    <li><strong>Backend:</strong> EC2 Auto Scaling, Load Balancer, Beanstalk</li>
+    <li><strong>Database:</strong> DocumentDB / MongoDB Atlas</li>
+    <li><strong>Auth:</strong> Cognito + JWT</li>
+    <li><strong>AI:</strong> Lambda + API Gateway (Gemini API)</li>
+    <li><strong>Monitoring:</strong> CloudWatch, SNS</li>
+    <li><strong>Security:</strong> IAM, WAF, Secrets Manager</li>
+  </ul>
+</section>
+
+<section id="network">
+  <h2>4. Network Design</h2>
+  <ul>
+    <li>VPC: 10.0.0.0/16 (2 public, 2 private subnets)</li>
+    <li>Public: Load Balancer, NAT Gateway</li>
+    <li>Private: EC2, DocumentDB</li>
+    <li>Security Groups + NACLs for traffic control</li>
+    <li>Multi-AZ for high availability</li>
+  </ul>
+</section>
+
+<section id="scaling">
+  <h2>5. Scaling & Monitoring</h2>
+  <ul>
+    <li>Min instances: 1 | Max: 4</li>
+    <li>Scale out: CPU > 60%</li>
+    <li>Scale in: CPU < 30%</li>
+    <li>Monitored by CloudWatch dashboards</li>
+  </ul>
+</section>
+
+<section id="cost">
+  <h2>6. Cost Planning (Detailed AWS Monthly Estimate)</h2>
+  <p>
+    The following table provides an estimated monthly cost breakdown for the WanderWay cloud deployment 
+    under moderate traffic (~20,000 requests/day, ~10 GB storage). AWS Free Tier benefits are applied where possible.
+  </p>
+
+  <table>
+    <tr>
+      <th>Layer</th>
+      <th>Service</th>
+      <th>Usage Details</th>
+      <th>Estimated Monthly Cost (USD)</th>
+    </tr>
+
+    <!-- Presentation Layer -->
+    <tr>
+      <td rowspan="3"><strong>Presentation Layer</strong></td>
+      <td>Amazon S3</td>
+      <td>Static React site hosting (~5 GB storage, 10 GB data transfer)</td>
+      <td>$1.50</td>
+    </tr>
+    <tr>
+      <td>Amazon CloudFront (CDN)</td>
+      <td>100 GB data transfer (global edge delivery)</td>
+      <td>$8.00</td>
+    </tr>
+    <tr>
+      <td>Amazon Route 53 + Certificate Manager</td>
+      <td>1 hosted zone + 1 SSL certificate</td>
+      <td>$1.00</td>
+    </tr>
+
+    <!-- Application Layer -->
+    <tr>
+      <td rowspan="3"><strong>Application Layer</strong></td>
+      <td>Elastic Beanstalk + EC2</td>
+      <td>t3.small (2 instances, auto-scaling enabled, 200 hrs/mo)</td>
+      <td>$20.00</td>
+    </tr>
+    <tr>
+      <td>Application Load Balancer</td>
+      <td>Handles API traffic and scaling</td>
+      <td>$5.00</td>
+    </tr>
+    <tr>
+      <td>AWS Lambda + API Gateway</td>
+      <td>~1M requests/month (AI recommendation service)</td>
+      <td>$2.00</td>
+    </tr>
+
+    <!-- Data Layer -->
+    <tr>
+      <td rowspan="3"><strong>Data Layer</strong></td>
+      <td>Amazon DocumentDB</td>
+      <td>db.t3.medium instance + 20 GB storage + backup</td>
+      <td>$45.00</td>
+    </tr>
+    <tr>
+      <td>Amazon ElastiCache (Redis)</td>
+      <td>Cache layer for frequent queries (cache.t3.micro)</td>
+      <td>$8.00</td>
+    </tr>
+    <tr>
+      <td>Amazon Cognito</td>
+      <td>~1000 active users (authentication & tokens)</td>
+      <td>$5.00</td>
+    </tr>
+
+    <!-- Monitoring & Security -->
+    <tr>
+      <td rowspan="4"><strong>Monitoring & Security</strong></td>
+      <td>Amazon CloudWatch + X-Ray</td>
+      <td>10 custom metrics + 5GB logs</td>
+      <td>$3.00</td>
+    </tr>
+    <tr>
+      <td>AWS WAF</td>
+      <td>Web security (5 rules)</td>
+      <td>$4.00</td>
+    </tr>
+    <tr>
+      <td>AWS Secrets Manager</td>
+      <td>Secure storage for API keys, credentials</td>
+      <td>$1.00</td>
+    </tr>
+    <tr>
+      <td>Amazon SNS</td>
+      <td>~10K notifications per month</td>
+      <td>$1.00</td>
+    </tr>
+
+    <!-- CI/CD and Management -->
+    <tr>
+      <td rowspan="2"><strong>Management & CI/CD</strong></td>
+      <td>AWS CodePipeline + CodeDeploy</td>
+      <td>Automated deployment pipeline (GitHub → EC2)</td>
+      <td>$2.00</td>
+    </tr>
+    <tr>
+      <td>AWS IAM</td>
+      <td>Access control (no cost under Free Tier)</td>
+      <td>$0.00</td>
+    </tr>
+
+    <!-- Total -->
+    <tr style="background-color: rgba(0,255,255,0.1); font-weight: bold;">
+      <td colspan="3" style="text-align: center;"><strong>Total Estimated Monthly Cost</strong></td>
+      <td>$106.50</td>
+    </tr>
+  </table>
+
+  <div class="note-box">
+    <p><strong>Note:</strong> Costs may vary based on region and traffic volume. AWS Free Tier provides significant savings for the first 12 months:</p>
+    <ul>
+      <li>750 hrs/month of t2.micro or t3.micro instance usage (free EC2 tier)</li>
+      <li>5 GB S3 storage & 15 GB CloudFront data transfer free</li>
+      <li>1M Lambda requests/month free</li>
+    </ul>
+    <p>
+      Using Free Tier + Spot Instances can reduce the total to <strong>~$25–$35/month</strong> during development or testing phases.
+    </p>
+  </div>
+</section>
+
+<style>
+.note-box {
+  margin-top: 20px;
+  background: rgba(0, 200, 255, 0.1);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 255, 0.2);
+}
+.note-box ul {
+  margin: 10px 0 0 25px;
+  color: #bde3ff;
+}
+.note-box strong {
+  color: #00eaff;
+}
+</style>
+
+
+<section id="security">
+  <h2>7. Security & IAM</h2>
+  <ul>
+    <li>IAM Roles for EC2, Lambda, Pipeline</li>
+    <li>Secrets Manager for credentials</li>
+    <li>WAF for protection</li>
+    <li>HTTPS enforced with ACM</li>
+  </ul>
+</section>
+
+<section id="backup">
+  <h2>8. Backup & Recovery</h2>
+  <ul>
+    <li>DocumentDB auto snapshots</li>
+    <li>EC2 AMI snapshots</li>
+    <li>S3 versioning + Glacier</li>
+  </ul>
+</section>
+
+<section id="cicd">
+  <h2>9. CI/CD Workflow</h2>
+  <ul>
+    <li>GitHub → CodePipeline trigger</li>
+    <li>CodeBuild → Build artifact</li>
+    <li>CodeDeploy → EC2 deployment</li>
+    <li>CloudFront invalidation</li>
+  </ul>
+</section>
+
+<section id="benefits">
+  <h2>10. Key Benefits</h2>
+  <ul>
+    <li>Scalable and elastic AWS infra</li>
+    <li>High availability with multi-AZ</li>
+    <li>Secure with IAM, WAF, HTTPS</li>
+    <li>Automated CI/CD deployment</li>
+    <li>Pay-as-you-go, Free Tier friendly</li>
+  </ul>
+</section>
+
+<div class="footer">
+  <p>© 2025 WanderWay — IT457 Cloud Computing Project</p>
+  <p>Developed by <b>Sneh Joshi(202201048) | Sahil Chaudhary(202201171) | Kshitij Patel(202201232) | Neel Patel(202201494)</b></p>
+</div>
+
+</body>
+</html>
